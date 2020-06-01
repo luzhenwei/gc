@@ -16,20 +16,18 @@ from requests_html import HTMLSession
 session = HTMLSession()
 
 # 获取获取检验数据列表  需在网页登陆后获取
-pageUrl = r'http://spcjinsp.gsxt.gov.cn/test_platform/api/food/getFood?order=desc&offset=0&limit=10&dataType=8&startDate=2020-03-01&endDate=2020-06-01&taskFrom=&samplingUnit=&testUnit=&enterprise=&sampledUnit=&foodName=&province=&reportNo=&bsfla=&bsflb=&sampleNo=&foodType1=&foodType4=&sampleNo_index=0&_=1591018521068'
+pageUrl = r'http://spcjinsp.gsxt.gov.cn/test_platform/api/food/getFood?order=desc&offset=0&limit=300&dataType=8&startDate=2020-03-01&endDate=2020-06-01&taskFrom=&samplingUnit=&testUnit=&enterprise=&sampledUnit=&foodName=&province=&reportNo=&bsfla=&bsflb=&sampleNo=&foodType1=&foodType4=&sampleNo_index=0&_=1591024903201'
 # 获取普通检验数据详情
 infoUrl = ''
 infoUrl1 = r'http://spcjinsp.gsxt.gov.cn/test_platform/foodTest/foodDetail/%s'
-# infoUrl = r'http://spcjinsp.gsxt.gov.cn/test_platform/foodTest/foodDetail/5643269'
 # 获取农产品检验数据详情
 infoUrl2 = r'http://spcjinsp.gsxt.gov.cn/test_platform/agricultureTest/agricultureDetail/%s'
 # 请求头信息 需在网页登陆后获取 修改Cookie即可
 headers_1 = {
 
-    'Cookie': 'JSESSIONID=88F60F029E755733454DB461571FC30E; sod=f6o0JfZwnaMFJtvBx0Rj4X1bmfoQhiKd0m+z7g0zXVkOeOrF1B3VWw1qwKtMS2DwpVv600mt7sY='
+    'Cookie': 'JSESSIONID=C407F99838217EDE4A145ABDB745F815; sod=Buq8+EZl3y6Oa21rdOCPZeIbYuMmYMGLfsQsT+j8fjTdXoYXjmcrjP3RFJqqVGIEuA3ErgPCJLE='
 }
-pathUrl = r'G:\pythonProject\getUrlData\test.xlsx'
-
+excel_name = ''
 colNum = 0
 rowNum = 0
 
@@ -189,6 +187,7 @@ def writeContent2Excel(sheet, infoAllData, rowNum, newDict):
             sheet.write(rowNum + 1, colNum, infoAllData[infoDataKey].get(infoKey, ''))
             colNum += 1
 
+
 def getCookie():
     # 声明一个CookieJar对象实例来保存cookie
     cookie = cookiejar.CookieJar()
@@ -205,30 +204,41 @@ def getCookie():
         print('Value = %s' % item.value)
 
 
+def getMaxKey(type, infoList, max):
+    retInfoKey = []
+    for info in infoList:
+        min = len(info[1][type])
+        if min > max:
+            max = min
+            retInfoKey = info[1][type]
+    return retInfoKey
+
+def getdate():
+    return time.strftime("%Y-%m-%d", time.localtime())
+
 if __name__ == "__main__":
     # getCookie()
-    book = xlsxwriter.Workbook('test.xlsx')
-    sheet = book.add_worksheet('sheet1')
     print("======执行中，请等待======")
     if pageUrl.find("api/agriculture/getAgriculture") > -1:
         infoUrl = infoUrl2
+        excel_name = getdate() + '市县级农产品检测'
     else:
         infoUrl = infoUrl1
+        excel_name = getdate() + '普通食品检测'
+    book = xlsxwriter.Workbook(excel_name+'.xlsx')
+    sheet = book.add_worksheet('sheet1')
+
     infoList = getAllPageData(pageUrl)
     dictLen2 = 0
     newDict = {}
-    for info in infoList:
+    type_list = list(infoList[0][1].keys())
+
+    for infoKey in type_list:
         dictLen1 = 0
-        # print(info[1])
-        for infoDataKey in info[1]:
-            # print(info[1][infoDataKey])
-            for infoKey in info[1][infoDataKey]:
-                dictLen1 += len(infoKey)
-        # print(dictLen1)
-        if dictLen2 > dictLen1:
-            continue
-        dictLen2 = dictLen1
-        newDict = info[1]
+        max = 0
+        retInfoKey = []
+        newDict.update({infoKey: getMaxKey(infoKey, infoList, max)})
+        # print(newDict)
     num = 1
     # print(newDict)
     # print(info[1])
