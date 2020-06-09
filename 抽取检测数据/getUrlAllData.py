@@ -16,7 +16,7 @@ from requests_html import HTMLSession
 session = HTMLSession()
 
 # 获取获取检验数据列表  需在网页登陆后获取
-pageUrl = r'http://spcjinsp.gsxt.gov.cn/test_platform/api/food/getFood?order=desc&offset=0&limit=300&dataType=8&startDate=2020-03-01&endDate=2020-06-01&taskFrom=&samplingUnit=&testUnit=&enterprise=&sampledUnit=&foodName=&province=&reportNo=&bsfla=&bsflb=&sampleNo=&foodType1=&foodType4=&sampleNo_index=0&_=1591024903201'
+pageUrl = r'http://spcjinsp.gsxt.gov.cn/test_platform/api/food/getFood?order=desc&offset=0&limit=100&dataType=5&startDate=2020-03-09&endDate=2020-06-09&taskFrom=%E8%AE%B8%E6%98%8C&samplingUnit=&testUnit=&enterprise=&sampledUnit=&foodName=&province=&reportNo=&bsfla=&bsflb=&sampleNo=&foodType1=&foodType4=&sampleNo_index=1&_=1591668793187'
 # 获取普通检验数据详情
 infoUrl = ''
 infoUrl1 = r'http://spcjinsp.gsxt.gov.cn/test_platform/foodTest/foodDetail/%s'
@@ -25,7 +25,7 @@ infoUrl2 = r'http://spcjinsp.gsxt.gov.cn/test_platform/agricultureTest/agricultu
 # 请求头信息 需在网页登陆后获取 修改Cookie即可
 headers_1 = {
 
-    'Cookie': 'JSESSIONID=C407F99838217EDE4A145ABDB745F815; sod=Buq8+EZl3y6Oa21rdOCPZeIbYuMmYMGLfsQsT+j8fjTdXoYXjmcrjP3RFJqqVGIEuA3ErgPCJLE='
+    'Cookie': 'JSESSIONID=9F1C76358574183F7D3B2B4F5182B9F9-n4; sod=vEtbPv5Gdo+bqLRBKMSkVrjQN6npoSJ2jyxhjeremycuAR8yxhjeremyKgdThnMtCZAWF8Uz++M+5qrvblOo6STm9Cs='
 }
 excel_name = ''
 colNum = 0
@@ -204,14 +204,14 @@ def getCookie():
         print('Value = %s' % item.value)
 
 
+'''获取标题头名称
+'''
 def getMaxKey(type, infoList, max):
-    retInfoKey = []
+    retInfoKey = set([])
     for info in infoList:
-        min = len(info[1][type])
-        if min > max:
-            max = min
-            retInfoKey = info[1][type]
-    return retInfoKey
+        for info1 in info[1][type].keys():
+            retInfoKey.add(info1)
+    return list(retInfoKey)
 
 def getdate():
     return time.strftime("%Y-%m-%d", time.localtime())
