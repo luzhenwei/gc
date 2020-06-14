@@ -150,7 +150,7 @@ if __name__ == "__main__":
     infoDict = {}
     num = 1
     # 本程序同级目录下新建工作簿1.xlsx
-    book = xlsxwriter.Workbook('工作簿1.xlsx')
+    book = xlsxwriter.Workbook('提取日期.xlsx')
     sheet = book.add_worksheet('sheet1')
     sheet.write('A' + str(num), '序号')
     sheet.write('B' + str(num), '抽样单编号')
