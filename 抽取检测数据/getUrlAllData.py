@@ -16,7 +16,7 @@ from requests_html import HTMLSession
 session = HTMLSession()
 
 # 获取获取检验数据列表  需在网页登陆后获取
-pageUrl = r'http://spcjinsp.gsxt.gov.cn/test_platform/api/food/getFood?order=desc&offset=0&limit=100&dataType=5&startDate=2020-03-09&endDate=2020-06-09&taskFrom=%E8%AE%B8%E6%98%8C&samplingUnit=&testUnit=&enterprise=&sampledUnit=&foodName=&province=&reportNo=&bsfla=&bsflb=&sampleNo=&foodType1=&foodType4=&sampleNo_index=1&_=1591668793187'
+pageUrl = r'http://spcjinsp.gsxt.gov.cn/test_platform/api/food/getFood?order=desc&offset=0&limit=10000&dataType=8&startDate=2020-04-01&endDate=2020-12-15&taskFrom=&samplingUnit=&testUnit=&enterprise=&sampledUnit=&foodName=&province=&reportNo=&bsfla=&bsflb=&sampleNo=&foodType1=&foodType4=&sampleNo_index=0&_=1607999260523'
 # 获取普通检验数据详情
 infoUrl = ''
 infoUrl1 = r'http://spcjinsp.gsxt.gov.cn/test_platform/foodTest/foodDetail/%s'
@@ -25,7 +25,7 @@ infoUrl2 = r'http://spcjinsp.gsxt.gov.cn/test_platform/agricultureTest/agricultu
 # 请求头信息 需在网页登陆后获取 修改Cookie即可
 headers_1 = {
 
-    'Cookie': 'JSESSIONID=9F1C76358574183F7D3B2B4F5182B9F9-n4; sod=vEtbPv5Gdo+bqLRBKMSkVrjQN6npoSJ2jyxhjeremycuAR8yxhjeremyKgdThnMtCZAWF8Uz++M+5qrvblOo6STm9Cs='
+    'Cookie': 'JSESSIONID=4E9AB10ADDDD69810DCEC4BDE2711DCC-n3; sod=bX5LETFu3xUGsPj4aGSM6C6DEjml87uImYSyIrpJOkefMGhHQIaRlA1jhL66X4R3vOcnAsAIfAE='
 }
 excel_name = ''
 colNum = 0
@@ -57,6 +57,7 @@ def getData(infoUrl):
 
 def getAllData(infoUrl):
     # 有密码的请求一定要用post()
+    print(infoUrl)
     response = session.get(infoUrl, headers=headers_1)
     html_doc = response.text
     soup = BeautifulSoup(html_doc, "lxml")
@@ -74,7 +75,81 @@ def getAllData(infoUrl):
             continue
         elif divName == '检验信息':
             testform = div1.find('form', id="testform")
+            if testform  is None:
+                continue
             divForm = testform.find_all('div', class_="row")
+
+            for divForm1 in divForm:
+                divForm2 = divForm1.find_all('label', class_="control-label col-sm-5")
+                divForm3 = divForm1.find_all('div', class_="col-sm-7")
+                divForm2List = []
+                divForm3List = []
+                for divForm20 in divForm2:
+                    divForm2List.append(divForm20.text.strip())
+                for divForm30 in divForm3:
+                    divForm3List.append(divForm30.text.strip())
+
+                divFormLen = len(divForm2List)
+                if divFormLen > 0:
+                    i = 0
+                    while i < divFormLen:
+                        a = {divForm2List[i]: divForm3List[i]}
+                        divFormDict.update(a)
+                        i += 1
+            # print(divFormDict)
+            aDict = {divName: divFormDict}
+            infoAllData.update(aDict)
+        else:
+
+            div2 = div1.find_all('div', class_="row form-group")
+            for div3 in div2:
+                div40List = []
+                div50List = []
+                div4 = div3.find_all('label', class_="control-label col-sm-4")
+                div5 = div3.find_all('div', class_="col-sm-8")
+                for div40 in div4:
+                    div40List.append(div40.text.strip())
+                for div50 in div5:
+                    div50List.append(div50.text.strip())
+                if len(div40List) > 0:
+                    i = 0
+                    div4len = len(div40List)
+                    while i < div4len:
+                        b = {div40List[i]: div50List[i]}
+                        div2Dict.update(b)
+                        i += 1
+            # print(div2Dict)
+            bDict = {divName: div2Dict}
+            infoAllData.update(bDict)
+    # print(infoAllData)
+    dictValue = infoAllData['生产企业信息']
+    del (infoAllData['生产企业信息'])
+    newDict = {'生产企业信息': dictValue}
+    infoAllData.update(newDict)
+    return infoAllData
+
+def getAllDataDtb(infoUrl):
+    # 有密码的请求一定要用post()
+    response = session.get(infoUrl, headers=headers_1)
+    html_doc = response.text
+    soup = BeautifulSoup(html_doc, "lxml")
+    # print(soup.prettify())
+    # divOne = soup.find(id="collapseOne")
+    # print(divOne)
+    # print(len(divOne))
+    divs = soup.find_all('div', class_="ibox float-e-margins")
+
+    infoAllData = {}
+    for div1 in divs:
+        divName = div1.find('h2').text
+        # print(divName)
+        div2Dict = {}
+        divFormDict = {}
+        if divName == '照片信息':
+            continue
+        elif divName == '检验信息':
+            # testform = div1.find('form', id="testform")
+            divForm = div1.find_all('div', class_="row")
             for divForm1 in divForm:
                 divForm2 = divForm1.find_all('label', class_="control-label col-sm-5")
                 divForm3 = divForm1.find_all('div', class_="col-sm-7")
@@ -138,7 +213,24 @@ def getAllPageData(pageUrl):
         # print(info['id'])
         # print(info['sp_s_16'])
         # 筛选状态是 完全提交的
-        if info['sp_i_state'] == 9:
+        # sp_i_state == 9
+        # 完全提交
+        # sp_i_state == 2 | | sp_i_state == 0) {
+        # if (row.sp_i_jgback == 1) {
+        # 退修待填报
+        # }
+        # 待填报
+        # row.sp_i_state == 12
+        # 待签章
+        # sp_i_state == 4
+        # 待审核
+        # sp_i_state == 5
+        # 待批准
+        # sp_i_state == 7
+        # 待发送
+        # sp_i_state == 1
+        # 已退修
+        if info['sp_i_state'] == 9 or  info['sp_i_state'] == 5:
             oneList = [info['sp_s_16']]
             oneList.append(getAllData(infoUrl % info['id']))
             num += 1
@@ -146,7 +238,14 @@ def getAllPageData(pageUrl):
             # updateExcel(sheet, num, oneList)
             # num += 1
             infoList.append(oneList)
-
+        elif  info['sp_i_state'] == 2:
+            oneList = [info['sp_s_16']]
+            oneList.append(getAllDataDtb(infoUrl % info['id']))
+            num += 1
+            # print(oneList)
+            # updateExcel(sheet, num, oneList)
+            # num += 1
+            infoList.append(oneList)
     print("未统计数据条数：" + str(len(infoJson['rows']) - num))
     return infoList
 
@@ -221,10 +320,10 @@ if __name__ == "__main__":
     print("======执行中，请等待======")
     if pageUrl.find("api/agriculture/getAgriculture") > -1:
         infoUrl = infoUrl2
-        excel_name = getdate() + '市县级农产品检测'
+        excel_name = getdate() + '市县级农产品检测信息统计'
     else:
         infoUrl = infoUrl1
-        excel_name = getdate() + '普通食品检测'
+        excel_name = getdate() + '普通食品检测信息统计'
     book = xlsxwriter.Workbook(excel_name+'.xlsx')
     sheet = book.add_worksheet('sheet1')
 
