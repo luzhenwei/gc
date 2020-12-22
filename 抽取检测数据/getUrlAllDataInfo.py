@@ -16,7 +16,7 @@ from requests_html import HTMLSession
 session = HTMLSession()
 
 # 获取获取检验数据列表  需在网页登陆后获取
-pageUrl = r'http://spcjinsp.gsxt.gov.cn/test_platform/api/food/getFood?order=desc&offset=0&limit=10000&dataType=5&startDate=&endDate=2020-12-18&taskFrom=&samplingUnit=&testUnit=&enterprise=&sampledUnit=&foodName=&province=&reportNo=&bsfla=&bsflb=&sampleNo=&foodType1=&foodType4=&sampleNo_index=0&_=1608275829527'
+pageUrl = r'http://spcjinsp.gsxt.gov.cn/test_platform/api/food/getFood?order=desc&offset=0&limit=10000&dataType=5&startDate=2020-01-01&endDate=2020-12-18&taskFrom=&samplingUnit=&testUnit=&enterprise=&sampledUnit=&foodName=&province=&reportNo=&bsfla=&bsflb=&sampleNo=&foodType1=&foodType4=&sampleNo_index=0&_=1608282885149'
 # 获取普通检验数据详情
 infoUrl = ''
 infoUrl1 = r'http://spcjinsp.gsxt.gov.cn/test_platform/foodTest/foodDetail/%s'
